@@ -240,7 +240,7 @@ function enablePorts(node, type) {
     });
   }
 
-  // Add drag-to-connect for custom-output-port (Switch/EditFields)
+  // Add drag-to-connect for custom-output-port (all nodes except ChatMessageTrigger and AIAgent)
   const customOutputPort = node.querySelector('.custom-output-port');
   if (customOutputPort) {
     customOutputPort.addEventListener('mousedown', function(e) {
