@@ -153,6 +153,16 @@ function createNode(type, id, x, y) {
         </div>
       </div>
     `;
+  } else if (type === 'Switch' || type === 'EditFields') {
+    portsHTML = `
+      <div class="n8n-node-ports">
+        <div class="n8n-node-port n8n-node-port-input" data-port-type="input"></div>
+        <div class="output-port-row">
+          <div class="output-line"></div>
+          <div class="custom-output-port" title="Drag to connect">+</div>
+        </div>
+      </div>
+    `;
   } else {
     portsHTML = `
       <div class="n8n-node-ports">

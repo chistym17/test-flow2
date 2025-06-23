@@ -227,7 +227,8 @@
   transition: border-color 0.2s, background 0.2s;
 }
 .n8n-node-port-input {
-  margin-right: auto;
+  right: 22px;
+  bottom: 25px;
 }
 .n8n-node-port-output {
   margin-left: auto;
