@@ -352,7 +352,7 @@
 }
 .output-port-row {
   position: absolute;
-  right: -44px;
+  right: -75px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -360,27 +360,31 @@
   gap: 0;
 }
 .output-line {
-  width: 32px;
+  width: 48px;
   height: 4px;
   background: #cfd8dc;
   border-radius: 2px;
   margin: 0;
 }
 .wechat-output-port {
-  width: 22px;
-  height: 22px;
+  width: 32px;
+  height: 32px;
   background: #232336;
-  border: 3px solid #fff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 2px solid #cfd8dc;
+  border-radius: 6px;
   margin: 0 8px;
   box-shadow: 0 2px 8px #0003;
-  cursor: crosshair;
+  cursor: pointer;
   z-index: 10;
+  font-size: 24px;
+  color: #cfd8dc;
   transition: border-color 0.2s, background 0.2s;
+  line-height: 25px;
+  text-align: right;
+  padding-right: 6px;
+  padding-top: 2px;
 }
+
 .wechat-output-port:hover {
   border-color: #4f8cff;
   background: #2d3748;
@@ -391,12 +395,8 @@
   border: 2px solid #cfd8dc;
   border-radius: 6px;
   background: #232336;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 24px;
   color: #cfd8dc;
-  margin-left: 8px;
   box-sizing: border-box;
   cursor: default;
   z-index: 3;

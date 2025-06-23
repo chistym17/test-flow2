@@ -112,8 +112,7 @@ function createNode(type, id, x, y) {
         </span>
         <div class="output-port-row">
           <div class="output-line"></div>
-          <div class="wechat-output-port" title="Drag to connect"></div>
-          <div class="output-plus">+</div>
+          <div class="wechat-output-port" title="Drag to connect">+</div>
         </div>
       </div>
       <div class="wechat-node-label">When Chat<br>Message Received</div>
@@ -304,15 +303,23 @@ function enablePorts(node, type) {
   }
 }
 
-function getPortCenter(node, portSelector, portIndex = 0) {
+function getPortCenter(node, portSelector, portIndex = 0, towardPoint = null) {
   if (node.classList.contains('wechat-custom-node') && portSelector === '.n8n-node-port-output') {
     const port = node.querySelector('.wechat-output-port');
     const rect = port.getBoundingClientRect();
     const canvasRect = document.getElementById('canvas-area').getBoundingClientRect();
-    return {
-      x: rect.left + rect.width / 2 - canvasRect.left,
-      y: rect.top + rect.height / 2 - canvasRect.top
-    };
+    let cx = rect.left + rect.width / 2 - canvasRect.left;
+    let cy = rect.top + rect.height / 2 - canvasRect.top;
+    // If we know where the line is going, offset toward that direction
+    if (towardPoint) {
+      const dx = towardPoint.x - cx;
+      const dy = towardPoint.y - cy;
+      const len = Math.sqrt(dx*dx + dy*dy) || 1;
+      const r = rect.width / 2; // radius
+      cx += dx / len * r;
+      cy += dy / len * r;
+    }
+    return { x: cx, y: cy };
   } else if (portSelector === '.n8n-node-port-suboutput' && node.querySelectorAll(portSelector).length > 1) {
     const port = node.querySelectorAll(portSelector)[portIndex];
     const rect = port.getBoundingClientRect();
@@ -347,8 +354,6 @@ function updateConnections() {
     const fromNode = document.querySelector(`[data-node-id='${conn.from}']`);
     const toNode = document.querySelector(`[data-node-id='${conn.to}']`);
     if (!fromNode || !toNode) return;
-
-    // Check if the from port is hidden
     let fromPortEl;
     if (conn.fromType === 'suboutput') {
       fromPortEl = fromNode.querySelectorAll('.n8n-node-port-suboutput')[conn.fromPort];
@@ -358,17 +363,17 @@ function updateConnections() {
       fromPortEl = fromNode.querySelector('.n8n-node-port-output');
     }
     if (!fromPortEl || fromPortEl.offsetParent === null || getComputedStyle(fromPortEl).display === 'none') {
-      // Port is hidden, skip drawing this connection
       return;
     }
-
-    let from;
+    let from, to;
+    to = getPortCenter(toNode, '.n8n-node-port-input');
     if (conn.fromType === 'suboutput') {
       from = getPortCenter(fromNode, '.n8n-node-port-suboutput', conn.fromPort);
+    } else if (fromNode.classList.contains('wechat-custom-node')) {
+      from = getPortCenter(fromNode, '.n8n-node-port-output', 0, to);
     } else {
       from = getPortCenter(fromNode, '.n8n-node-port-output', conn.fromPort);
     }
-    const to = getPortCenter(toNode, '.n8n-node-port-input');
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', createBezierPath(from.x, from.y, to.x, to.y));
     path.setAttribute('stroke', '#cfd8dc');
@@ -388,13 +393,15 @@ function drawTempLine(e) {
   if (!draggingConnection || !connectionStart) return;
   const fromNode = document.querySelector(`[data-node-id='${connectionStart.nodeId}']`);
   let from;
+  const canvasRect = document.getElementById('canvas-area').getBoundingClientRect();
+  const to = { x: e.clientX - canvasRect.left, y: e.clientY - canvasRect.top };
   if (connectionStart.port === 'suboutput') {
     from = getPortCenter(fromNode, '.n8n-node-port-suboutput', connectionStart.outputIndex);
+  } else if (fromNode.classList.contains('wechat-custom-node')) {
+    from = getPortCenter(fromNode, '.n8n-node-port-output', 0, to);
   } else {
     from = getPortCenter(fromNode, '.n8n-node-port-output', connectionStart.outputIndex);
   }
-  const canvasRect = document.getElementById('canvas-area').getBoundingClientRect();
-  const to = { x: e.clientX - canvasRect.left, y: e.clientY - canvasRect.top };
   const tempLine = document.getElementById('temp-connection-line');
   if (tempLine) {
     tempLine.setAttribute('d', createBezierPath(from.x, from.y, to.x, to.y));
@@ -498,7 +505,6 @@ function updateWeChatNodePlaceholder(node) {
   const nodeId = node.getAttribute('data-node-id');
   const hasConnection = connections.some(c => c.from === nodeId);
   node.querySelector('.output-line').style.display = hasConnection ? 'none' : 'block';
-  node.querySelector('.output-plus').style.display = hasConnection ? 'none' : 'block';
   node.querySelector('.wechat-output-port').style.display = 'block';
 }
 
