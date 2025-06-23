@@ -237,6 +237,34 @@ function enablePorts(node, type) {
     });
   }
 
+  // Add drag-to-connect for custom-output-port (Switch/EditFields)
+  const customOutputPort = node.querySelector('.custom-output-port');
+  if (customOutputPort) {
+    customOutputPort.addEventListener('mousedown', function(e) {
+      e.stopPropagation();
+      customOutputPort.classList.add('connecting');
+      draggingConnection = true;
+      connectionStart = { nodeId, port: 'output', outputIndex: 0 };
+      const svg = document.getElementById('connections-svg');
+      let tempLine = document.getElementById('temp-connection-line');
+      if (!tempLine) {
+        tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        tempLine.setAttribute('id', 'temp-connection-line');
+        tempLine.setAttribute('stroke', '#cfd8dc');
+        tempLine.setAttribute('stroke-width', '3');
+        tempLine.setAttribute('fill', 'none');
+        tempLine.setAttribute('pointer-events', 'none');
+        svg.appendChild(tempLine);
+      }
+      document.addEventListener('mousemove', drawTempLine);
+      document.addEventListener('mouseup', function removeConnecting() {
+        customOutputPort.classList.remove('connecting');
+        document.removeEventListener('mouseup', removeConnecting);
+      });
+      document.addEventListener('mouseup', endConnection);
+    });
+  }
+
   if (type === 'AIAgent') {
     const subOutputs = node.querySelectorAll('.n8n-node-port-suboutput');
     subOutputs.forEach((subOutput, idx) => {
@@ -369,6 +397,8 @@ function updateConnections() {
       fromPortEl = fromNode.querySelectorAll('.n8n-node-port-suboutput')[conn.fromPort];
     } else if (fromNode.classList.contains('wechat-custom-node')) {
       fromPortEl = fromNode.querySelector('.wechat-output-port');
+    } else if (fromNode.getAttribute('data-node-type') === 'Switch' || fromNode.getAttribute('data-node-type') === 'EditFields') {
+      fromPortEl = fromNode.querySelector('.custom-output-port');
     } else {
       fromPortEl = fromNode.querySelector('.n8n-node-port-output');
     }
@@ -381,6 +411,8 @@ function updateConnections() {
       from = getPortCenter(fromNode, '.n8n-node-port-suboutput', conn.fromPort);
     } else if (fromNode.classList.contains('wechat-custom-node')) {
       from = getPortCenter(fromNode, '.n8n-node-port-output', 0, to);
+    } else if (fromNode.getAttribute('data-node-type') === 'Switch' || fromNode.getAttribute('data-node-type') === 'EditFields') {
+      from = getPortCenter(fromNode, '.custom-output-port', 0, to);
     } else {
       from = getPortCenter(fromNode, '.n8n-node-port-output', conn.fromPort);
     }
@@ -409,6 +441,8 @@ function drawTempLine(e) {
     from = getPortCenter(fromNode, '.n8n-node-port-suboutput', connectionStart.outputIndex);
   } else if (fromNode.classList.contains('wechat-custom-node')) {
     from = getPortCenter(fromNode, '.n8n-node-port-output', 0, to);
+  } else if (fromNode.getAttribute('data-node-type') === 'Switch' || fromNode.getAttribute('data-node-type') === 'EditFields') {
+    from = getPortCenter(fromNode, '.custom-output-port', 0, to);
   } else {
     from = getPortCenter(fromNode, '.n8n-node-port-output', connectionStart.outputIndex);
   }

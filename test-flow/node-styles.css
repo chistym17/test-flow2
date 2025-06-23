@@ -526,4 +526,26 @@ body {
   text-shadow: 0 2px 4px rgba(0,0,0,0.4);
   line-height: 1.1;
   letter-spacing: 0.5px;
+}
+
+.custom-output-port {
+  width: 32px;
+  height: 32px;
+  background: #232336;
+  border: 2px solid #cfd8dc;
+  border-radius: 6px;
+  margin: 0 8px;
+  box-shadow: 0 2px 8px #0003;
+  cursor: pointer;
+  z-index: 10;
+  font-size: 24px;
+  color: #cfd8dc;
+  transition: border-color 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.custom-output-port:hover {
+  border-color: #4f8cff;
+  background: #2d3748;
 } 
